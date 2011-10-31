@@ -1,6 +1,6 @@
 Demo
 ========
-[Prototype](http://http://vimeo.com/31340394)
+[Prototype](http://vimeo.com/31340394)
 
 How To Use
 ========
