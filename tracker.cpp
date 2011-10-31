@@ -3,6 +3,9 @@
 tracker::tracker() {
 	size = 0;
 	sizeTarget = 12;
+	r = 255;
+	g = 0;
+	b = 0;
 }
 
 float tracker::distanceTo(float x, float y) {
@@ -33,6 +36,7 @@ void tracker::draw(int debug, float x, float y, int ow, int oh, int width, int h
 		ofFill();
 		ofSetColor(255, 0, 0);
 		ofCircle(ox, oy, 2);
+		ofCircle(ox + width + 10, oy, 5);
 		ofDrawBitmapString("blob id:" + ofToString(id), ox+5, oy+5);
 	} else {
 		float ox = posScreen.x;

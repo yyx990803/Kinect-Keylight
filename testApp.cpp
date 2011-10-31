@@ -156,28 +156,34 @@ void testApp::draw() {
 		// draw instructions
 		ofSetColor(255, 255, 255);
 		stringstream reportStream;
-		reportStream << "Near Treshold: " << nearThreshold << " (press: + -)" << endl
-		<< "Far Threshold: " << farThreshold << " (press: < >)" << endl
-		<< "Play Speed: " << playSpeed << " (press: [ ])" << endl
-		<< "Blobs found: " << contourFinder.nBlobs << endl
+		reportStream << "Near Treshold: " << nearThreshold << " (- +)" << endl
+		<< "Far Threshold: " << farThreshold << " ([ ])" << endl
+		<< "Play Speed: " << playSpeed << " (< >)" << endl
 		<< "Toggle Debug Mode: d" << endl
+		<< "Blobs found: " << contourFinder.nBlobs << endl
 		<< "FPS: " << ofGetFrameRate() << endl
 		<< "Connection: " << kinect.isConnected() << " (open: o, close: c)";
-		ofDrawBitmapString(reportStream.str(),20,ofGetHeight()-85);
+		ofDrawBitmapString(reportStream.str(),20,ofGetHeight()-95);
 	}
 
 	if(debug == 0) {
 		//debug mode with all information
 		kinect.drawDepth(10, 10, 400, 300);
 		kinect.draw(420, 10, 400, 300);
-		grayImage.draw(10, 310, 400, 300);
-		contourFinder.draw(10, 310, 400, 300);
+		grayImage.draw(10, 320, 400, 300);
+		contourFinder.draw(10, 320, 400, 300);
+		ofNoFill();
+		ofSetColor(200, 200, 200);
+		ofRect(10, 10, 400, 300);
+		ofRect(420, 10, 400, 300);
+		ofRect(10, 320, 400, 300);
+		ofRect(420, 320, 400, 300);
     } else if (debug == 1) {
 		//overlay mode for calibration
 		kinect.draw(0, 0, ofGetWidth(), ofGetHeight());
 	}
 	
-	if (trackerObjects.size() > 1 && debug != 0) {
+	if (trackerObjects.size() > 1) {
 		
 		if (playhead.index > trackerObjects.size()-1) {
 			playhead.index = 0;
@@ -197,7 +203,7 @@ void testApp::draw() {
 		newPos.set(newX, newY);
 		playhead.addPosition(newPos);
 		
-		if (playhead.distanceTo(trackerObjects[oi]) < min(trackerObjects[oi].size, 10.0f)) {
+		if (playhead.distanceTo(trackerObjects[oi]) < 10.0f) {
 			
 			playhead.index ++;
 			if (playhead.index > trackerObjects.size()-1) {
@@ -220,7 +226,7 @@ void testApp::draw() {
 			
 		}
 		
-		playhead.draw();
+		playhead.draw(debug);
 	}
 	
 	for (int i = 0; i < trackerObjects.size(); i++){

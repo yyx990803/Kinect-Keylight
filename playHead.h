@@ -20,5 +20,5 @@ public:
 	float distanceTo(tracker p);
 	void addPosition(ofPoint p);
 	ofPoint getPosition();
-	void draw();
+	void draw(int debug);
 };

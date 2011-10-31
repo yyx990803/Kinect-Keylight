@@ -28,20 +28,32 @@ ofPoint playHead::getPosition() {
 }
 
 
-void playHead::draw() {
+void playHead::draw(int debug) {
 	if (positions.size() > 1) {
 		ofSetColor(r, g, b);
 		ofSetLineWidth(2);
 		for (int i = 0; i < positions.size()-1; i++) {
+			
 			float nx = positions[i+1].x;
 			float ny = positions[i+1].y;
 			
+			if (debug == 0) {
+				nx = 420 + ofMap(nx, 0, ofGetWidth(), 0, 400, true);
+				ny = 320 + ofMap(ny, 0, ofGetHeight(), 0, 300, true);
+				ofSetColor(0, 255, 0);
+			}
+			
 			ofBeginShape();
-			
-			if (i==0)
-				ofVertex(positions[i].x, positions[i].y);
+			if (i==0) {
+				if (debug == 0) {
+					float ox = 420 + ofMap(positions[i].x, 0, ofGetWidth(), 0, 400, true);
+					float oy = 320 + ofMap(positions[i].y, 0, ofGetHeight(), 0, 300, true);
+					ofVertex(ox, oy);
+				} else {
+					ofVertex(positions[i].x, positions[i].y);
+				}
+			}
 			ofVertex(nx, ny);
-			
 			ofEndShape();
 		}
 		ofSetLineWidth(1);

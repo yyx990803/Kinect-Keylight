@@ -27,7 +27,7 @@ public:
 	
 	float distanceTo(float x, float y);
 	void update(float x, float y, int index, int ow=640, int oh=480);
-	void draw(int debug=0, float x=10, float y=310, int ow=640, int oh=480, int width=400, int height=300);
+	void draw(int debug=0, float x=10, float y=320, int ow=640, int oh=480, int width=400, int height=300);
 	void drawParticles();
 	void emit(ofPoint direction);
 };
