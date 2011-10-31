@@ -49,7 +49,7 @@ public:
 	int height;
 	int cols;
 	int rows;
-	int playSpeed;
+	float playSpeed;
 	
 	int debug;
 };

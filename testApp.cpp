@@ -35,7 +35,7 @@ void testApp::setup() {
 	idCount = 0;
 	
 	debug = 0; // 0: debug, 1: overlay, 2: projection
-	playSpeed = 2;
+	playSpeed = 2.5;
 	cols = 3;
 	rows = 10;
 	
@@ -197,8 +197,8 @@ void testApp::draw() {
 		
 		float targetX = trackerObjects[oi].posScreen.x;
 		float targetY = trackerObjects[oi].posScreen.y;
-		float newX = currentX + (targetX - currentX) * (float)playSpeed / 10.0f;
-		float newY = currentY + (targetY - currentY) * (float)playSpeed / 10.0f;
+		float newX = currentX + (targetX - currentX) * playSpeed / 10.0f;
+		float newY = currentY + (targetY - currentY) * playSpeed / 10.0f;
 		
 		newPos.set(newX, newY);
 		playhead.addPosition(newPos);
@@ -275,12 +275,13 @@ void testApp::keyPressed (int key) {
 			
 		case '.':
 		case '>':
-			playSpeed ++;
+			playSpeed += 0.5;
 			break;
 			
 		case ',':
 		case '<':
-			playSpeed --;
+			if (playSpeed > 0.5)
+				playSpeed -= 0.5;
 			break;
 
 		case 'w':

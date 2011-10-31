@@ -72,7 +72,7 @@ void tracker::drawParticles() {
 			particles.erase(particles.begin(), particles.begin()+1);
 		}
 		
-		while (particles.size() > 30) {
+		while (particles.size() > 50) {
 			particles.erase(particles.begin(), particles.begin()+1);
 		}
 	}

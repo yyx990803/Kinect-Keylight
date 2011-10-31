@@ -31,7 +31,7 @@ ofPoint playHead::getPosition() {
 void playHead::draw(int debug) {
 	if (positions.size() > 1) {
 		ofSetColor(r, g, b);
-		ofSetLineWidth(2);
+		ofSetLineWidth(3.5);
 		for (int i = 0; i < positions.size()-1; i++) {
 			
 			float nx = positions[i+1].x;

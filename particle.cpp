@@ -20,6 +20,6 @@ void particle::draw(int r, int g, int b) {
 	
 	ofFill();
 	ofSetColor(r, g, b, (int)(76.5+ofRandom(178.5)));
-	ofCircle(x, y, 0.5 + ofRandom(0.5));
+	ofCircle(x, y, 0.5 + ofRandom(1));
 }
 
