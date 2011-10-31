@@ -8,8 +8,10 @@ bool notFountThisFrame(tracker t){
 void testApp::setup() {
 	
 	ofBackground(0, 0, 0);
-	ofSetFrameRate(40);
+	ofSetFrameRate(31);
     ofSetLogLevel(OF_LOG_VERBOSE);
+	ofEnableAlphaBlending();
+	ofEnableSmoothing();
 
 	kinect.init();
 	//kinect.init(true);  // shows infrared instead of RGB video image
@@ -28,14 +30,14 @@ void testApp::setup() {
 	grayThreshNear.allocate(width, height);
 	grayThreshFar.allocate(width, height);
 
-	nearThreshold = 190;
-	farThreshold  = 172;
+	nearThreshold = 255;
+	farThreshold  = 225; //roof 140 / hand 225
 	idCount = 0;
 	
-	debug = true;
-	showTracking = true;
-	ease = 0.95;
+	debug = 0; // 0: debug, 1: overlay, 2: projection
 	playSpeed = 2;
+	cols = 3;
+	rows = 10;
 	
 	ofPoint p;
 	p.set(width/2, height/2);
@@ -88,7 +90,6 @@ void testApp::update() {
 		
 		if (nBlobsFoundThisFrame > 0){
 			
-			
 			for (int i = 0; i < nBlobsFoundThisFrame; i++){
 				bAmIFoundThisFrame[i] = false;
 			}
@@ -100,12 +101,12 @@ void testApp::update() {
 				float	minDistance = 100000;
 				int		minIndex	= -1;
 				
+				float bx = contourFinder.blobs[i].centroid.x;
+				float by = contourFinder.blobs[i].centroid.y;
+				
 				for (int j = 0; j < trackerObjects.size(); j++){
 					if (trackerObjects[j].bFoundThisFrame == false){
-						
-						float dx = trackerObjects[j].pos.x - contourFinder.blobs[i].centroid.x;
-						float dy = trackerObjects[j].pos.y - contourFinder.blobs[i].centroid.y;
-						float distance = sqrt(dx*dx + dy*dy);
+						float distance = trackerObjects[j].distanceTo(bx, by);
 						if (distance < minDistance){
 							minDistance = distance;
 							minIndex = j;
@@ -114,20 +115,7 @@ void testApp::update() {
 				}
 				
 				if (minIndex != -1 && minDistance < 100){		// 100 = just a guess.
-					trackerObjects[minIndex].pos.x = contourFinder.blobs[i].centroid.x;
-					trackerObjects[minIndex].pos.y = contourFinder.blobs[i].centroid.y;
-					
-					trackerObjects[minIndex].posSmooth.x = ease * trackerObjects[minIndex].posSmooth.x + 
-					(1.0f-ease) * trackerObjects[minIndex].pos.x;
-					trackerObjects[minIndex].posSmooth.y = ease * trackerObjects[minIndex].posSmooth.y + 
-					(1.0f-ease) * trackerObjects[minIndex].pos.y;
-					
-					trackerObjects[minIndex].posScreen.x = ofMap(trackerObjects[minIndex].posSmooth.x, 0, width, 0, ofGetWidth(), true);
-					trackerObjects[minIndex].posScreen.y = ofMap(trackerObjects[minIndex].posSmooth.y, 0, height, 0, ofGetHeight(), true);
-					
-					trackerObjects[minIndex].whoThisFrame = i;
-					trackerObjects[minIndex].bFoundThisFrame = true;
-					trackerObjects[minIndex].nFramesActive ++;
+					trackerObjects[minIndex].update(bx, by, i);
 					bAmIFoundThisFrame[i] = true;	// we got one !
 				}
 			}
@@ -163,13 +151,8 @@ void testApp::update() {
 void testApp::draw() {
 
 	ofSetColor(255, 255, 255);
-
-	if(debug) {
-		
-		kinect.drawDepth(ofGetWidth()-1230, ofGetHeight()-310, 400, 300);
-		kinect.draw(ofGetWidth()-820, ofGetHeight()-310, 400, 300);
-		grayImage.draw(ofGetWidth()-410, ofGetHeight()-310, 400, 300);
-		contourFinder.draw(ofGetWidth()-410, ofGetHeight()-310, 400, 300);
+	
+	if (debug == 0 || debug == 1) {
 		// draw instructions
 		ofSetColor(255, 255, 255);
 		stringstream reportStream;
@@ -177,73 +160,60 @@ void testApp::draw() {
 		<< "Far Threshold: " << farThreshold << " (press: < >)" << endl
 		<< "Play Speed: " << playSpeed << " (press: [ ])" << endl
 		<< "Blobs found: " << contourFinder.nBlobs << endl
-		<< "Toggle Debug: d / Toggle Tracking: t" << endl
+		<< "Toggle Debug Mode: d" << endl
 		<< "FPS: " << ofGetFrameRate() << endl
 		<< "Connection: " << kinect.isConnected() << " (open: o, close: c)";
 		ofDrawBitmapString(reportStream.str(),20,ofGetHeight()-85);
-		
-		for (int i = 0; i < trackerObjects.size(); i++){
-			int id = trackerObjects[i].id;
-			float ox = ofGetWidth()-410 + ofMap(trackerObjects[i].posSmooth.x, 0, width, 0, 400);
-			float oy = ofGetHeight() - 310 + ofMap(trackerObjects[i].posSmooth.y, 0, height, 0, 300);
-			ofFill();
-			ofSetColor(255, 0, 0);
-			ofCircle(ox, oy, 2);
-			ofDrawBitmapString("blob id:" + ofToString(id), ox+5, oy+5);
-		}
-		
-    }
-	
-	if (showTracking) {
-		for (int i = 0; i < trackerObjects.size(); i++){
-			
-			float ox = trackerObjects[i].posScreen.x;
-			float oy = trackerObjects[i].posScreen.y;
-			int id = trackerObjects[i].id;
-			
-			ofFill();
-			float hw = ofGetWidth()/2;
-			int r = 63 + (int)((1-min(ox/hw, 1.0f))*189);
-			int g = 63 + (int)(abs((ox>hw ? ox-(hw*2) : ox) / hw) * 189);
-			int b = 63 + (int)(max(( (ox - hw) / hw), 0.0f) * 189);
-			ofSetColor(r, g, b);
-			ofCircle(ox, oy, 5);
-			ofSetColor(255, 255, 255);
-			ofDrawBitmapString("blob id:" + ofToString(id), ox+10, oy+5);
-		}
+	}
+
+	if(debug == 0) {
+		//debug mode with all information
+		kinect.drawDepth(10, 10, 400, 300);
+		kinect.draw(420, 10, 400, 300);
+		grayImage.draw(10, 310, 400, 300);
+		contourFinder.draw(10, 310, 400, 300);
+    } else if (debug == 1) {
+		//overlay mode for calibration
+		kinect.draw(0, 0, ofGetWidth(), ofGetHeight());
 	}
 	
-	if (trackerObjects.size() > 1) {
+	if (trackerObjects.size() > 1 && debug != 0) {
 		
 		if (playhead.index > trackerObjects.size()-1) {
 			playhead.index = 0;
 		}
 		
-		tracker target = trackerObjects[playhead.index];
+		int oi = playhead.index;
 		ofPoint newPos;
 		
 		float currentX = playhead.getPosition().x;
 		float currentY = playhead.getPosition().y;
 		
-		float targetX = target.posScreen.x;
-		float targetY = target.posScreen.y;
+		float targetX = trackerObjects[oi].posScreen.x;
+		float targetY = trackerObjects[oi].posScreen.y;
 		float newX = currentX + (targetX - currentX) * (float)playSpeed / 10.0f;
 		float newY = currentY + (targetY - currentY) * (float)playSpeed / 10.0f;
 		
 		newPos.set(newX, newY);
 		playhead.addPosition(newPos);
 		
-		if (playhead.distanceTo(target) < 5) {
+		if (playhead.distanceTo(trackerObjects[oi]) < min(trackerObjects[oi].size, 10.0f)) {
 			
 			playhead.index ++;
 			if (playhead.index > trackerObjects.size()-1) {
 				playhead.index = 0;
 			}
 			
-			//TODO Inherit color from target
-			//TODO Target emit particles
+			playhead.r = trackerObjects[oi].r;
+			playhead.g = trackerObjects[oi].g;
+			playhead.b = trackerObjects[oi].b;
 			
-			int soundIndex = ofClamp((int)(targetY/ofGetHeight()*30), 0, 29);
+			trackerObjects[oi].emit(trackerObjects[playhead.index].posScreen);
+			
+			//play corresponding sound
+			int sx = ofClamp((int)(targetX/ofGetWidth()*cols), 0, cols-1);
+			int sy = ofClamp((int)(targetY/ofGetHeight()*rows), 0, rows-1);
+			int soundIndex = sy * cols + sx;
 			float pct = targetX / ofGetWidth();
 			sounds[soundIndex].play();
 			sounds[soundIndex].setPan(pct);
@@ -253,11 +223,15 @@ void testApp::draw() {
 		playhead.draw();
 	}
 	
+	for (int i = 0; i < trackerObjects.size(); i++){
+		//draw all tracked objects
+		trackerObjects[i].draw(debug);
+	}
+	
 }
 
 //--------------------------------------------------------------
 void testApp::exit() {
-	kinect.setCameraTiltAngle(0); // zero the tilt on exit
 	kinect.close();
 }
 
@@ -266,21 +240,18 @@ void testApp::keyPressed (int key) {
 	switch (key) {
 		
 		case 'd':
-			debug = !debug;
+			debug ++;
+			if (debug > 2) debug = 0;
 			break;
 			
-		case 't':
-			showTracking = !showTracking;
-			break;
-			
-		case '>':
-		case '.':
+		case ']':
+		case '}':
 			farThreshold ++;
 			if (farThreshold > 255) farThreshold = 255;
 			break;
 
-		case '<':
-		case ',':
+		case '[':
+		case '{':
 			farThreshold --;
 			if (farThreshold < 0) farThreshold = 0;
 			break;
@@ -296,13 +267,13 @@ void testApp::keyPressed (int key) {
 			if (nearThreshold < 0) nearThreshold = 0;
 			break;
 			
-		case ']':
-		case '}':
+		case '.':
+		case '>':
 			playSpeed ++;
 			break;
 			
-		case '[':
-		case '{':
+		case ',':
+		case '<':
 			playSpeed --;
 			break;
 

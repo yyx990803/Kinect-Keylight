@@ -38,17 +38,17 @@ public:
 
 	int 				nearThreshold;
 	int					farThreshold;
-	bool debug;
-	bool showTracking;
+	int debug;
 
 	vector < tracker > trackerObjects;
 	int idCount;
-	float ease;
 
 	vector < ofSoundPlayer > sounds;
 	playHead playhead;
 
 	int width;
 	int height;
+	int cols;
+	int rows;
 	int playSpeed;
 };

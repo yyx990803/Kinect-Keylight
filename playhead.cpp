@@ -29,6 +29,21 @@ ofPoint playHead::getPosition() {
 
 
 void playHead::draw() {
-	ofSetColor(r, g, b);
-	ofCircle(getPosition().x, getPosition().y, 2);
+	if (positions.size() > 1) {
+		ofSetColor(r, g, b);
+		ofSetLineWidth(2);
+		for (int i = 0; i < positions.size()-1; i++) {
+			float nx = positions[i+1].x;
+			float ny = positions[i+1].y;
+			
+			ofBeginShape();
+			
+			if (i==0)
+				ofVertex(positions[i].x, positions[i].y);
+			ofVertex(nx, ny);
+			
+			ofEndShape();
+		}
+		ofSetLineWidth(1);
+	}
 }
