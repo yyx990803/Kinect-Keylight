@@ -35,20 +35,21 @@ public:
 	ofxCvGrayscaleImage grayThreshFar;		// the far thresholded image
 
 	ofxCvContourFinder 	contourFinder;
-
 	int 				nearThreshold;
 	int					farThreshold;
-	int debug;
 
 	vector < tracker > trackerObjects;
 	int idCount;
 
 	vector < ofSoundPlayer > sounds;
+	
 	playHead playhead;
-
+	
 	int width;
 	int height;
 	int cols;
 	int rows;
 	int playSpeed;
+	
+	int debug;
 };

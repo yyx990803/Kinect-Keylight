@@ -11,11 +11,12 @@ public:
 	int index;
 	int length;
 	int size;
-	vector<ofPoint> positions;
 	
 	int r;
 	int g;
 	int b;
+	
+	vector<ofPoint> positions;
 	
 	float distanceTo(tracker p);
 	void addPosition(ofPoint p);

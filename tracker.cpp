@@ -14,29 +14,29 @@ float tracker::distanceTo(float x, float y) {
 	return sqrt(dx*dx + dy*dy);
 }
 
-void tracker::update(float x, float y, int index, int ow, int oh) {
+void tracker::update(float x, float y, int index, int kinectWidth, int kinectHeight) {
 	pos.x = x;
 	pos.y = y;
 	float ease = 0.95;
 	posSmooth.x = ease * posSmooth.x + (1.0f-ease) * x;
 	posSmooth.y = ease * posSmooth.y + (1.0f-ease) * y;
 	
-	posScreen.x = ofMap(posSmooth.x, 0, ow, 0, ofGetWidth(), true);
-	posScreen.y = ofMap(posSmooth.y, 0, oh, 0, ofGetHeight(), true);
+	posScreen.x = ofMap(posSmooth.x, 0, kinectWidth, 0, ofGetWidth(), true);
+	posScreen.y = ofMap(posSmooth.y, 0, kinectHeight, 0, ofGetHeight(), true);
 	
 	whoThisFrame = index;
 	bFoundThisFrame = true;
 	nFramesActive ++;
 }
 
-void tracker::draw(int debug, float x, float y, int ow, int oh, int width, int height) {
+void tracker::draw(int debug, int kinectWidth, int kinectHeight) {
 	if (debug == 0) {
-		float ox = x + ofMap(posSmooth.x, 0, ow, 0, width);
-		float oy = y + ofMap(posSmooth.y, 0, oh, 0, height);
+		float ox = 10 + ofMap(posSmooth.x, 0, kinectWidth, 0, 400);
+		float oy = 320 + ofMap(posSmooth.y, 0, kinectHeight, 0, 300);
 		ofFill();
 		ofSetColor(255, 0, 0);
 		ofCircle(ox, oy, 2);
-		ofCircle(ox + width + 10, oy, 5);
+		ofCircle(ox + 410, oy, 5);
 		ofDrawBitmapString("blob id:" + ofToString(id), ox+5, oy+5);
 	} else {
 		float ox = posScreen.x;
